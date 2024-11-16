@@ -28,21 +28,25 @@ class TuningOp : OpMode() {
 
         armControl(gamepad2)
 
+        telemetry.addData("right_stick", gamepad2.right_stick_y)
+        telemetry.addData("left_stick", gamepad2.left_stick_y)
+
+
         dave.update()
     }
 
     fun armControl(gamepad: Gamepad) {
-        if (gamepad.dpad_up) dave.armUp()
-        if (gamepad.dpad_down) dave.armDown()
+        if (gamepad.right_stick_y < -0.1) dave.armUp()
+        if (gamepad.right_stick_y > 0.1) dave.armDown()
 
-        if (gamepad.dpad_left) dave.extend()
-        if (gamepad.dpad_right) dave.retract()
+        if (gamepad.left_stick_y < -0.1) dave.extend()
+        if (gamepad.left_stick_y > 0.1) dave.retract()
 
         if (gamepad.right_trigger > 0) dave.closePincer()
-        if (gamepad.right_bumper) dave.openPincer()
+        if (gamepad.left_trigger > 0) dave.openPincer()
 
-        if (gamepad.left_trigger > 0) dave.retractFullPower()
-        if (gamepad.left_bumper) dave.resetExtension()
+//        if (gamepad.left_trigger > 0) dave.retractFullPower()
+//        if (gamepad.left_bumper) dave.resetExtension()
     }
 }
 

@@ -85,7 +85,7 @@ class Dave(
         }
     var armExtension = 0
         set(value) {
-            var target = clamp(value, minimumArmExtension, maximumArmExtension)
+            var target = clamp(value, minimumArmExtension, (maximumArmExtension - (armPosition * 0.075).toInt()))
             extension.targetPosition = target
             extension.velocity = extensionVelocity
             extension.mode = RUN_TO_POSITION
@@ -145,25 +145,25 @@ class Dave(
         var armAngleHang: Double = 0.0
 
         @JvmField
-        var armGearRatio = 20
+        var armGearRatio = 5
 
         @JvmField
-        var armPositionModifier = 1
+        var armPositionModifier = 5
 
         @JvmField
-        var maximumArmPosition = 700
+        var maximumArmPosition = 1150
 
         @JvmField
         var minimumArmPosition = 0
 
         @JvmField
-        var maximumArmExtension = 600
+        var maximumArmExtension = 570
 
         @JvmField
         var minimumArmExtension = 0
 
         @JvmField
-        var extensionRate = 100
+        var extensionRate = 25
 
         @JvmField
         var armVelocity = 1000.0
@@ -175,7 +175,7 @@ class Dave(
         var pincerClosePosition = 0.0
 
         @JvmField
-        var pincerOpenPosition = 1.0
+        var pincerOpenPosition = 0.45
     }
 
     fun update() {
