@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.config.Config
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket
 import com.acmerobotics.roadrunner.Action
 import com.acmerobotics.roadrunner.Pose2d
+import com.acmerobotics.roadrunner.Rotation2d
 import com.acmerobotics.roadrunner.Vector2d
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot.LogoFacingDirection
@@ -21,13 +22,16 @@ import com.qualcomm.robotcore.hardware.Servo
 import com.qualcomm.robotcore.hardware.ServoImplEx
 import org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry
 import org.firstinspires.ftc.robotcore.external.Telemetry
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.RADIANS
 import org.firstinspires.ftc.teamcode.TestingTeleop
 import org.firstinspires.ftc.teamcode.drivetrain.DrivetrainConfig
 import org.firstinspires.ftc.teamcode.drivetrain.DrivetrainTuningParameters
 import org.firstinspires.ftc.teamcode.drivetrain.FeedForward
 import org.firstinspires.ftc.teamcode.drivetrain.Gain
+import org.firstinspires.ftc.teamcode.drivetrain.MecanumDrive
 import org.firstinspires.ftc.teamcode.drivetrain.MecanumDrivetrain
 import org.firstinspires.ftc.teamcode.drivetrain.driveMotors
+import org.firstinspires.ftc.teamcode.drivetrain.heading
 import org.firstinspires.ftc.teamcode.drivetrain.imu
 import org.firstinspires.ftc.teamcode.drivetrain.nextVoltageSensor
 import org.firstinspires.ftc.teamcode.helpers.PowerVector
@@ -35,6 +39,7 @@ import org.firstinspires.ftc.teamcode.helpers.getMotor
 import org.firstinspires.ftc.teamcode.helpers.getServo
 import org.firstinspires.ftc.teamcode.helpers.mecanumDrive
 import org.firstinspires.ftc.teamcode.robot.Robot
+import java.lang.Thread.sleep
 import kotlin.math.PI
 
 
@@ -75,6 +80,7 @@ class Dave(
     val arm by lazy { hardwareMap.getMotor("arm_motor") }
     val extension by lazy { hardwareMap.getMotor("extension_motor") }
     val pincer by lazy { hardwareMap.getServo("pincer") }
+    val imu by lazy { hardwareMap.imu() }
     var armPosition = 0
         set(value) {
             var target = clamp(value, minimumArmPosition, maximumArmPosition)
@@ -176,11 +182,31 @@ class Dave(
 
         @JvmField
         var pincerOpenPosition = 0.45
+
+        @JvmField
+        var autoStrafeSpeed = 0.4
+
+        @JvmField
+        var autoRotateSpeed = 0.4
+    }
+
+    fun autoStrafeFor(millis: Int) {
+        omni.powerVector = PowerVector(0.0, autoStrafeSpeed, 0.0)
+        sleep(millis.toLong())
+        omni.powerVector = PowerVector(0.0,0.0,0.0)
+    }
+
+    fun rotateToHeading(heading: Double) {
+        while(heading.minus(imu.robotYawPitchRollAngles.getYaw(RADIANS)) > 1.0) {
+            omni.powerVector = PowerVector(0.0, 0.0, autoRotateSpeed)
+        }
+        omni.powerVector = PowerVector(0.0,0.0,0.0)
     }
 
     fun update() {
         telemetry.motorPosition("Arm", arm)
         telemetry.motorPosition("Extension", extension)
+        telemetry.addData("imu heading", imu.robotYawPitchRollAngles.getYaw(RADIANS))
         positionHistory.add(position)
         velocityHistory.add(velocity)
     }
@@ -236,6 +262,8 @@ class Dave(
 
         arm.mode = RUN_TO_POSITION
         extension.mode = RUN_TO_POSITION
+
+        imu.resetYaw()
     }
 }
 
