@@ -27,6 +27,5 @@ class LeftAuto : LinearOpMode() {
         waitForStart()
 
         dave.autoStrafeFor(2000)
-
     }
 }
