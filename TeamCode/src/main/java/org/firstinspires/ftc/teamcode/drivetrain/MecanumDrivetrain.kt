@@ -55,6 +55,7 @@ import org.firstinspires.ftc.teamcode.drivetrain.MecanumDrive.Companion.PARAMS
 import org.firstinspires.ftc.teamcode.drivetrain.messages.MecanumLocalizerInputsMessage
 import org.firstinspires.ftc.teamcode.drivetrain.messages.PoseMessage
 import org.firstinspires.ftc.teamcode.helpers.getMotor
+import org.firstinspires.ftc.teamcode.helpers.heading
 import java.lang.Math.PI
 import java.util.LinkedList
 import kotlin.math.max
@@ -328,46 +329,7 @@ data class BotDimensions(
     val weight: Double = 5.0,
 )
 
-fun HardwareMap.imu(
-    name: String = "imu", orientation: ImuOrientationOnRobot = RevHubOrientationOnRobot(
-        LogoFacingDirection.UP, UsbFacingDirection.BACKWARD
-    )
-): IMU {
-    return LazyImu(this, name, orientation).imu
-}
-
-val HardwareMap.nextVoltageSensor: VoltageSensor get() = voltageSensor.iterator().next()
-
-fun HardwareMap.driveMotors(
-    leftFront: String = "left_front",
-    leftFrontDirection: Direction = REVERSE,
-    rightFront: String = "right_front",
-    rightFrontDirection: Direction = FORWARD,
-    leftBack: String = "left_back",
-    leftBackDirection: Direction = REVERSE,
-    rightBack: String = "right_back",
-    rightBackDirection: Direction = REVERSE,
-): DriveMotors {
-    return DriveMotors(
-        leftFront = DriveMotor(this.getMotor(leftFront), leftFrontDirection),
-        rightFront = DriveMotor(this.getMotor(rightFront), rightFrontDirection),
-        leftBack = DriveMotor(this.getMotor(leftBack), leftBackDirection),
-        rightBack = DriveMotor(this.getMotor(rightBack), rightBackDirection)
-    )
-}
-
-
 val DriveMotor.positionAndVelocity: PositionVelocityPair get() = this.encoder.getPositionAndVelocity()
-
-val LazyImu.imu: IMU
-    get() = this.get()
-
-val IMU.heading: Rotation2d
-    get() = Rotation2d.exp(
-        this.robotYawPitchRollAngles.getYaw(
-            RADIANS
-        )
-    )
 
 class DriveLocalizer(val motors: DriveMotors, val imu: IMU, val params: DrivetrainTuningParameters) :
     Localizer {

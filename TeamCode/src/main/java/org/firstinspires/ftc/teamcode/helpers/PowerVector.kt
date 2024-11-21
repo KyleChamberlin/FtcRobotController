@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.helpers
 
+import com.acmerobotics.roadrunner.PoseVelocity2d
+import com.acmerobotics.roadrunner.Vector2d
+
 data class PowerVector(
     val axial: Double,
     val lateral: Double,
@@ -18,4 +21,8 @@ data class PowerVector(
     fun rightFrontPower() = (axial - lateral - yaw)
     fun leftBackPower() = (axial - lateral + yaw)
     fun rightBackPower() = (axial + lateral - yaw)
+}
+
+fun PowerVector.asPoseVelocity(): PoseVelocity2d {
+    return PoseVelocity2d(Vector2d(axial, lateral), yaw)
 }
