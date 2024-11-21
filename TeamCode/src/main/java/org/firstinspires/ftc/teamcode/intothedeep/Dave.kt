@@ -163,19 +163,19 @@ class Dave(
         var minimumArmPosition = 0
 
         @JvmField
-        var maximumArmExtension = 570
+        var maximumArmExtension = 7000
 
         @JvmField
         var minimumArmExtension = 0
 
         @JvmField
-        var extensionRate = 25
+        var extensionRate = 250
 
         @JvmField
         var armVelocity = 1000.0
 
         @JvmField
-        var extensionVelocity = 1000.0
+        var extensionVelocity = 5000.0
 
         @JvmField
         var pincerClosePosition = 0.0
@@ -203,7 +203,7 @@ class Dave(
         omni.powerVector = PowerVector(0.0,0.0,0.0)
     }
 
-    fun update() {
+    override fun update() {
         telemetry.motorPosition("Arm", arm)
         telemetry.motorPosition("Extension", extension)
         telemetry.addData("imu heading", imu.robotYawPitchRollAngles.getYaw(RADIANS))
@@ -247,7 +247,7 @@ class Dave(
         pincerPosition = pincerOpenPosition
     }
 
-    fun initialize() {
+    override fun initialize() {
         arm.zeroPowerBehavior = BRAKE
         arm.mode = STOP_AND_RESET_ENCODER
         arm.targetPosition = arm.currentPosition

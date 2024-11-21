@@ -10,4 +10,7 @@ interface Robot {
     var velocity: PoseVelocity2d // = PoseVelocity2d(Vector2d(0.0, 0.0), 0.0),
     val positionHistory: MutableList<Pose2d> //= LinkedList<Pose2d>(),
     val velocityHistory: MutableList<PoseVelocity2d> //= LinkedList<PoseVelocity2d>(),
+    fun update()
+    fun initialize()
+//    fun driveToPosition(position: Pose2d)
 }
