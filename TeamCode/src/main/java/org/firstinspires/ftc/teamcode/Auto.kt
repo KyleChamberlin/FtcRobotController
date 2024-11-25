@@ -2,14 +2,9 @@ package org.firstinspires.ftc.teamcode
 
 import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
-import com.acmerobotics.roadrunner.PoseVelocity2d
-import com.acmerobotics.roadrunner.Vector2d
 import com.qualcomm.hardware.lynx.LynxModule.BulkCachingMode.AUTO
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode
-import com.qualcomm.robotcore.eventloop.opmode.OpMode
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp
-import com.qualcomm.robotcore.hardware.Gamepad
 import org.firstinspires.ftc.teamcode.helpers.bulkCachingMode
 import org.firstinspires.ftc.teamcode.intothedeep.Dave
 
@@ -47,6 +42,10 @@ class SpecimenParkRight : LinearOpMode() {
     }
 }
 
+object AutoVars{
+
+}
+
 @Autonomous(group = "Into The Deep", name = "Specimen - Don't Park", preselectTeleOp = "Dave" )
 class SpecimenNoPark : LinearOpMode() {
     val dave by lazy { Dave(hardwareMap, telemetry) }
@@ -58,9 +57,28 @@ class SpecimenNoPark : LinearOpMode() {
 
         dave.initialize()
 
+        dave.closePincer()
+
         waitForStart()
 
-        dave.autoStrafeFor(2000)
+//        sleep(10000)
+
+        dave.autoForwardFor(1550)
+
+        dave.armTo(-1950)
+        dave.extensionTo(3900)
+        dave.wristPosition = 0.7
+
+        sleep(500)
+        dave.wristPosition = 0.8
+        dave.extensionTo(3000)
+        sleep(600)
+        dave.openPincer()
+        dave.autoBackwardFor(1000)
+        dave.extensionTo(0)
+        dave.armTo(0)
+        sleep(100000)
+
     }
 }
 
@@ -77,6 +95,6 @@ class Sample : LinearOpMode() {
 
         waitForStart()
 
-        dave.autoStrafeFor(2000)
+        dave.wrist.position = 0.0
     }
 }

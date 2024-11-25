@@ -41,11 +41,11 @@ class DaveTeleOP : OpMode() {
         if (gamepad.left_stick_y < -0.1) dave.extend()
         if (gamepad.left_stick_y > 0.1) dave.retract()
 
-        if (gamepad.right_trigger > 0) dave.closePincer()
-        if (gamepad.left_trigger > 0) dave.openPincer()
+        if (gamepad.right_trigger > 0) dave.openPincer()
+        if (gamepad.left_trigger > 0) dave.closePincer()
 
-        if (gamepad.left_stick_x < -0.1) dave.wristDown()
-        if (gamepad.left_stick_x > 0.1) dave.wristUp()
+        if (gamepad.left_bumper) dave.wristDown()
+        if (gamepad.right_bumper) dave.wristUp()
     }
 }
 

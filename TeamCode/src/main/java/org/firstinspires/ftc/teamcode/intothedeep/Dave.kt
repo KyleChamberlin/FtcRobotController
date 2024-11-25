@@ -42,6 +42,10 @@ class Dave(
     override val drivetrain by lazy { hardwareMap.mecanumDrive() }
     override var position = startingPose
     override var velocity = PowerVector(0.0, 0.0, 0.0)
+        set(value) {
+            field = value
+            drivetrain.powerVector = value
+        }
     override val positionHistory = mutableListOf(position.copy())
     override val velocityHistory = mutableListOf(velocity.asPoseVelocity())
     val arm by lazy { hardwareMap.getMotor("arm_motor") }
@@ -49,7 +53,6 @@ class Dave(
     val wrist by lazy { hardwareMap.getServo("wrist") }
     val leftPincer by lazy { hardwareMap.getServo("pincer_left") }
     val rightPincer by lazy { hardwareMap.getServo("pincer_right") }
-    val imu by lazy { hardwareMap.imu() }
     var armPosition = 0
         set(value) {
             var target = clamp(value, minimumArmPosition, maximumArmPosition)
@@ -63,7 +66,11 @@ class Dave(
             var target = clamp(
                 value,
                 minimumArmExtension,
-                (maximumArmExtension - (armPosition * 0.075).toInt())
+                clamp(
+                    maximumArmExtension - ((armPosition / minimumArmPosition) * 3000).toInt(),
+                    minimumArmExtension,
+                    maximumArmExtension
+                )
             )
             extension.targetPosition = target
             extension.velocity = extensionVelocity
@@ -119,43 +126,43 @@ class Dave(
         var armGearRatio = 5
 
         @JvmField
-        var armPositionModifier = 5
+        var armPositionModifier = 3
 
         @JvmField
-        var maximumArmPosition = 1150
+        var maximumArmPosition = 0
 
         @JvmField
-        var minimumArmPosition = 0
+        var minimumArmPosition = -2500
 
         @JvmField
-        var maximumArmExtension = 7000
+        var maximumArmExtension = 9000
 
         @JvmField
         var minimumArmExtension = 0
 
         @JvmField
-        var extensionRate = 250
+        var extensionRate = 100
 
         @JvmField
-        var armVelocity = 1000.0
+        var armVelocity = 500.0
 
         @JvmField
-        var extensionVelocity = 5000.0
+        var extensionVelocity = 2000.0
 
         @JvmField
         var wristRate = 0.01
 
         @JvmField
-        var rightPincerClosePosition = 0.0
+        var rightPincerClosePosition = 1.0
 
         @JvmField
-        var leftPincerClosePosition = 0.0
+        var leftPincerClosePosition = 1.0
 
         @JvmField
-        var rightPincerOpenPosition = 1.0
+        var rightPincerOpenPosition = 0.0
 
         @JvmField
-        var leftPincerOpenPosition = 1.0
+        var leftPincerOpenPosition = 0.0
 
         @JvmField
         var autoLinearSpeed = 0.4
@@ -170,19 +177,44 @@ class Dave(
         drivetrain.powerVector = PowerVector(0.0, 0.0, 0.0)
     }
 
-    fun rotateToHeading(heading: Double) {
-        while (heading.minus(imu.robotYawPitchRollAngles.getYaw(RADIANS)) > 1.0) {
-            drivetrain.powerVector = PowerVector(0.0, 0.0, autoRotationalSpeed)
+    fun autoForwardFor(millis: Int) {
+        drivetrain.powerVector = PowerVector(autoLinearSpeed, 0.0, 0.0)
+        sleep(millis.toLong())
+        drivetrain.powerVector = PowerVector(0.0, 0.0, 0.0)
+    }
+    fun autoBackwardFor(millis: Int) {
+        drivetrain.powerVector = PowerVector(-autoLinearSpeed, 0.0, 0.0)
+        sleep(millis.toLong())
+        drivetrain.powerVector = PowerVector(0.0, 0.0, 0.0)
+    }
+
+    fun armTo(position: Int) {
+        armPosition = position
+        while (arm.currentPosition > armPosition + 5) {
+            telemetry.motorPosition("arm", arm)
+            sleep(10)
         }
+    }
+
+    fun extensionTo(position: Int) {
+        armExtension = position
+        while (extension.currentPosition < armExtension - 5) {
+            telemetry.motorPosition("extension", extension)
+            sleep(10)
+        }
+    }
+
+    fun rotateToHeading(heading: Double) {
         drivetrain.powerVector = PowerVector(0.0, 0.0, 0.0)
     }
 
     override fun update() {
         telemetry.motorPosition("Arm", arm)
         telemetry.motorPosition("Extension", extension)
-        telemetry.addData("imu heading", imu.robotYawPitchRollAngles.getYaw(RADIANS))
+        telemetry.addData("velocity", velocity)
         positionHistory.add(position)
         velocityHistory.add(velocity.asPoseVelocity())
+
     }
 
     fun specimenToUpperChamber() {
@@ -243,14 +275,14 @@ class Dave(
     override fun initialize() {
         arm.zeroPowerBehavior = BRAKE
         arm.mode = STOP_AND_RESET_ENCODER
-        arm.targetPosition = arm.currentPosition
-        arm.direction = FORWARD
+        arm.targetPosition = 0
+        arm.direction = REVERSE
         arm.velocity = armVelocity
 
         extension.zeroPowerBehavior = BRAKE
         extension.mode = STOP_AND_RESET_ENCODER
-        extension.targetPosition = extension.currentPosition
-        extension.direction = REVERSE
+        extension.targetPosition = 0
+        extension.direction = FORWARD
         extension.velocity = extensionVelocity
 
         arm.mode = RUN_TO_POSITION
@@ -259,8 +291,6 @@ class Dave(
         wrist.direction = Servo.Direction.FORWARD
         rightPincer.direction = Servo.Direction.FORWARD
         leftPincer.direction = Servo.Direction.REVERSE
-
-        imu.resetYaw()
     }
 }
 

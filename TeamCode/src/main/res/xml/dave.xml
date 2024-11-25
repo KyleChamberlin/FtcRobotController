@@ -6,9 +6,9 @@
             <RevRoboticsUltraplanetaryHDHexMotor name="right_front_motor" port="1" />
             <RevRoboticsUltraplanetaryHDHexMotor name="left_back_motor" port="2" />
             <RevRoboticsUltraplanetaryHDHexMotor name="right_back_motor" port="3" />
-            <Servo name="wrist" port="0" />
-            <Servo name="pincer_left" port="1" />
-            <Servo name="pincer_right" port="2" />
+            <Servo name="wrist" port="3" />
+            <Servo name="pincer_left" port="4" />
+            <Servo name="pincer_right" port="5" />
         </LynxModule>
         <LynxModule name="Control Hub" port="173">
             <RevRoboticsUltraplanetaryHDHexMotor name="arm_motor" port="0" />

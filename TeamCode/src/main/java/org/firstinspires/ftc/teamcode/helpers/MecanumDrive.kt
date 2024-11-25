@@ -84,7 +84,7 @@ class MecanumDrive(
     }
 
     companion object {
-        @JvmField var velocityMultiplier = 27
+        @JvmField var velocityMultiplier = 23
     }
 
     fun stop() {
